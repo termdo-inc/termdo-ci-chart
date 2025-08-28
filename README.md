@@ -1,2 +1,2 @@
-# termdo-pipelines
+# termdo-ci
 Tekton CI pipelines for termdo app
