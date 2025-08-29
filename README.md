@@ -1,2 +1,2 @@
-# termdo-ci
-Tekton CI pipelines for termdo app
+# termdo-ci-chart
+Helm chart for termdo CI, powered by Tekton.
