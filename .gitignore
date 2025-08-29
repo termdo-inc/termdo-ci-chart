@@ -1,0 +1,29 @@
+*
+
+# >-----< INCLUDES >-----< #
+
+# [+]: Git files
+!.gitignore
+
+# [+]: Repo files
+!CHANGELOG.md
+!LICENSE.md
+!README.md
+
+# [+]: Template files
+!templates/
+!templates/**
+
+# [+]: Helm files
+!.helmignore
+!Chart.yaml
+!values.yaml
+
+# [+]: Config files
+!.editorconfig
+
+# >-----< EXCLUDES >-----< #
+
+# [-]: macOS files
+.DS_Store
+**/.DS_Store
