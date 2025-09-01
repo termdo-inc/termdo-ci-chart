@@ -26,9 +26,9 @@ spec:
         - name: revision
           value: $(params.revision)
         - name: retries
-          value: "3"
+          value: {{ .Values.pipeline.params.retries | quote }}
         - name: delay
-          value: "3"
+          value: {{ .Values.pipeline.params.delay | quote }}
       workspaces:
         - name: source
           workspace: shared

@@ -20,6 +20,9 @@ pipeline:
     pipeline: 1h0m0s
     tasks: 0h45m0s
     finally: 0h15m0s
+  params:
+    retries: 3
+    delay: 3
 
 workspace:
   size: 3Gi
