@@ -19,6 +19,8 @@ bitbucket:
     webhook: your_bitbucket_webhook_secret
     ssh: your_base64_encoded_bitbucket_ssh_private_key
 
+shaLength: 7
+
 pipeline:
   timeouts:
     pipeline: 1h0m0s

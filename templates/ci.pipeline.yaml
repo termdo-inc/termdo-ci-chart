@@ -77,4 +77,4 @@ spec:
         - name: revision
           value: $(params.revision)
         - name: sha-length
-          value: "7"
+          value: {{ .Values.shaLength | quote }}
