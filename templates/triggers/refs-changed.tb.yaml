@@ -1,4 +1,4 @@
-apiRevision: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: refs-changed-tb
