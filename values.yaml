@@ -6,3 +6,20 @@ harbor:
   secret:
     name: your_harbor_robot_account_name
     token: your_harbor_robot_account_token
+
+bitbucket:
+  host: your_bitbucket_server_host
+  branch: your_branch_name
+  webhook:
+    secretKey: your_bitbucket_webhook_secret_key
+  eventListener:
+    nodePort: 30019
+
+pipeline:
+  timeouts:
+    pipeline: 1h0m0s
+    tasks: 0h45m0s
+    finally: 0h15m0s
+
+workspace:
+  size: 3Gi

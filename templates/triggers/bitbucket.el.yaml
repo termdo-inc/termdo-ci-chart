@@ -1,0 +1,71 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: bitbucket-el
+spec:
+  serviceAccountName: tekton-account
+  triggers:
+    - name: refs-changed-trigger
+      interceptors:
+        - ref:
+            name: bitbucket
+          params:
+            - name: secretRef
+              value:
+                secretName: bitbucket-secret
+                secretKey: {{ .Values.bitbucket.webhook.secretKey }}
+            - name: eventTypes
+              value:
+                - repo:refs_changed
+        - ref:
+            name: cel
+          params:
+            {{- if or (eq .Values.environment "dev") (eq .Values.environment "test") }}
+            - name: filter
+              value: >
+                body.changes.exists(c,
+                  c.ref.type == "BRANCH" &&
+                  c.ref.displayId == "{{ .Values.bitbucket.branch }}" &&
+                  c.type == "UPDATE"
+                )
+            - name: overlays
+              value:
+                - key: project
+                  expression: body.repository.project.key
+                - key: revision
+                  expression: >
+                    body.changes.find(c,
+                      c.ref.type == "BRANCH" &&
+                      c.ref.displayId == "{{ .Values.bitbucket.branch }}" &&
+                      c.type == "UPDATE"
+                    ).toHash
+                - key: repository
+                  expression: body.repository.slug
+            {{- else }}
+            - name: filter
+              value: >
+                body.changes.exists(c,
+                  c.ref.type == "TAG" &&
+                  c.type == "ADD"
+                )
+            - name: overlays
+              value:
+                - key: project
+                  expression: body.repository.project.key
+                - key: revision
+                  expression: >
+                    body.changes.find(c,
+                      c.ref.type == "TAG" &&
+                      c.type == "ADD"
+                    ).displayId
+                - key: repository
+                  expression: body.repository.slug
+            {{- end }}
+      bindings:
+        - ref: refs-changed-tb
+      template:
+        ref: refs-changed-tt
+  resources:
+    kubernetesResource:
+      serviceType: NodePort
+      servicePort: {{ .Values.bitbucket.eventListener.nodePort }}

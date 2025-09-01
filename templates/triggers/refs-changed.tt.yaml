@@ -1,0 +1,37 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: refs-changed-tt
+spec:
+  params:
+    - name: url
+    - name: revision
+    - name: repository
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: ci-pipeline-run-
+      spec:
+        timeouts:
+          pipeline: {{ .Values.pipeline.timeouts.pipeline }}
+          tasks: {{ .Values.pipeline.timeouts.tasks }}
+          finally: {{ .Values.pipeline.timeouts.finally }}
+        pipelineRef:
+          name: ci-pipeline
+        params:
+          - name: url
+            value: $(tt.params.url)
+          - name: revision
+            value: $(tt.params.revision)
+          - name: repository
+            value: $(tt.params.repository)
+        workspaces:
+          - name: shared
+              volumeClaimTemplate:
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: {{ .Values.workspace.size }}

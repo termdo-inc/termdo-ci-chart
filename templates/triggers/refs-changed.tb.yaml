@@ -1,0 +1,12 @@
+apiRevision: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: refs-changed-tb
+spec:
+  params:
+    - name: url
+      value: "ssh://{{ .Values.bitbucket.host }}/scm/$(extensions.project)/$(extensions.repository).git"
+    - name: revision
+      value: "$(extensions.revision)"
+    - name: repository
+      value: "$(extensions.repository)"
