@@ -28,10 +28,10 @@ spec:
             value: $(tt.params.repository)
         workspaces:
           - name: shared
-              volumeClaimTemplate:
-                spec:
-                  accessModes:
-                    - ReadWriteOnce
-                  resources:
-                    requests:
-                      storage: {{ .Values.workspace.size }}
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: {{ .Values.workspace.size }}
