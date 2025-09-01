@@ -15,7 +15,7 @@ bitbucket:
     nodePort: 30019
   secret:
     webhook: your_bitbucket_webhook_secret
-    ssh: your_bitbucket_ssh_private_key
+    ssh: your_base64_encoded_bitbucket_ssh_private_key
 
 pipeline:
   timeouts:
