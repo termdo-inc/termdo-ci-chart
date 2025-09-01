@@ -11,10 +11,11 @@ bitbucket:
   host: your_bitbucket_server_host
   port: your_bitbucket_ssh_port
   branch: your_branch_name
-  webhook:
-    secretKey: your_bitbucket_webhook_secret_key
   eventListener:
     nodePort: 30019
+  secret:
+    webhook: your_bitbucket_webhook_secret
+    ssh: your_bitbucket_ssh_private_key
 
 pipeline:
   timeouts:

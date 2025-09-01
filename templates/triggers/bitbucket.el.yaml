@@ -13,7 +13,7 @@ spec:
             - name: secretRef
               value:
                 secretName: bitbucket-secret
-                secretKey: {{ .Values.bitbucket.webhook.secretKey }}
+                secretKey: {{ .Values.bitbucket.secret.webhook }}
             - name: eventTypes
               value:
                 - repo:refs_changed
