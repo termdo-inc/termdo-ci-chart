@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: bitbucket-config
 data:
-  known_hosts: {{ .Values.bitbucket.knownHosts | quote }}
+  known_hosts: {{ .Values.bitbucket.config.knownHosts | quote }}
