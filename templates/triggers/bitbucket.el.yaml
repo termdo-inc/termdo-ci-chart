@@ -3,7 +3,7 @@ kind: EventListener
 metadata:
   name: bitbucket-el
 spec:
-  serviceAccountName: tekton-account
+  serviceAccountName: tekton-sa
   triggers:
     - name: refs-changed-trigger
       interceptors:
