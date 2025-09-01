@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: analyze-task
+spec:
+  workspaces:
+    - name: source
+      description: Workspace containing the repository
+      readOnly: true
+  steps:
+    - name: analyze
+      image: alpine
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo -e "[⏳]: Analyzing..."
+        if [ ! -f "Dockerfile" ]; then
+          echo -e "[🔴]: Dockerfile not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Analysis complete.\n"

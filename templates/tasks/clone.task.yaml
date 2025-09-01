@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: clone-task
+spec:
+  params:
+    - name: url
+      type: string
+      description: SSH URL of the Git repository to clone
+    - name: revision
+      type: string
+      description: Tag name or commit SHA to checkout
+    - name: retries
+      type: string
+      description: Number of times to retry the clone on failure
+    - name: delay
+      type: string
+      description: Delay (in seconds) between retries
+  workspaces:
+    - name: source
+      description: Workspace to clone the repository into
+  steps:
+    - name: clone
+      image: alpine/git
+      volumeMounts:
+        - name: ssh
+          mountPath: /root/.ssh/id_rsa
+          subPath: ssh-privatekey
+        - name: known-hosts
+          mountPath: /root/.ssh/known_hosts
+          subPath: known_hosts
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo -e "[⏳]: Checking for .ssh directory..."
+        if [ ! -d /root/.ssh ]; then
+          echo -e "[🔴]: .ssh directory not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: .ssh directory found.\n"
+
+        echo -e "[⏳]: Checking for known hosts..."
+        if [ ! -e /root/.ssh/known_hosts ]; then
+          echo -e "[🔴]: Known hosts file not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Known hosts file found.\n"
+
+        echo -e "[⏳]: Checking for SSH private key..."
+        if [ ! -e /root/.ssh/id_rsa ]; then
+          echo -e "[🔴]: SSH private key not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: SSH private key found.\n"
+
+        echo -e "[⏳]: Cloning '$(params.url)'..."
+        rm -rf "lost+found/"
+        ATTEMPTS=0
+        until git clone "$(params.url)" .; do
+          ATTEMPTS=$((ATTEMPTS+1))
+          if [ "$ATTEMPTS" -ge "$(params.retries)" ]; then
+            echo "[🔴]: Failed to clone repository after $ATTEMPTS attempts."
+            exit 1
+          fi
+          echo "[🟠]: Clone failed, retrying in $(params.delay) seconds... ($ATTEMPTS/$(params.retries))"
+          sleep "$(params.delay)"
+        done
+        echo -e "[🟢]: Repository cloned to '$(workspaces.source.path)' directory.\n"
+
+        echo -e "[⏳]: Checking out revision '$(params.revision)'..."
+        git checkout --detach $(params.revision)
+        echo -e "[🟢]: Checked out revision '$(params.revision)'.\n"
+  volumes:
+    - name: ssh
+      secret:
+        secretName: bitbucket-secret
+        defaultMode: 0400
+    - name: known-hosts
+      configMap:
+        name: bitbucket-config
+        defaultMode: 0400

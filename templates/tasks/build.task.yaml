@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-task
+spec:
+  params:
+    - name: artifact
+      type: string
+      description: Name of the artifact (image tarball)
+  workspaces:
+    - name: source
+      description: Workspace containing the repository
+      readOnly: true
+    - name: artifacts
+      description: Workspace to store the built image tarball
+  steps:
+    - name: build
+      image: moby/buildkit:latest
+      securityContext:
+        privileged: true
+        appArmorProfile:
+          type: Unconfined
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo -e "[⏳]: Building the image..."
+        buildctl-daemonless.sh build \
+          --frontend dockerfile.v0 \
+          --local context="." \
+          --local dockerfile="." \
+          --output type=oci,dest="$(workspaces.artifacts.path)/$(params.artifact)"
+        echo -e "[🟢]: Image built and saved to '$(workspaces.artifacts.path)/$(params.artifact)'.\n"

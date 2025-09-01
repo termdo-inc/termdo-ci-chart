@@ -1,0 +1,87 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: push-task
+spec:
+  params:
+    - name: artifact
+      type: string
+      description: Name of the artifact (image tarball)
+    - name: repository
+      type: string
+      description: Image repository name
+    - name: revision
+      type: string
+      description: Git revision to tag the image with
+    - name: sha-length
+      type: string
+      description: Length of the git sha to use in the tag
+  workspaces:
+    - name: artifacts
+      description: Workspace containing the artifact
+      readOnly: true
+  steps:
+    - name: push
+      image: quay.io/skopeo/stable
+      securityContext:
+        appArmorProfile:
+          type: Unconfined
+      volumeMounts:
+        - name: docker-config
+          mountPath: /tekton/home/.docker
+      workingDir: $(workspaces.artifacts.path)
+      env:
+        - name: BUILDKITD_FLAGS
+          value: "--oci-worker-no-process-sandbox"
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo -e "[⏳]: Checking for artifact '$(params.artifact)'..."
+        if [ ! -f "$(params.artifact)" ]; then
+          echo -e "[🔴]: Artifact '$(params.artifact)' not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Artifact found.\n"
+
+        echo -e "[⏳]: Checking for Docker config..."
+        if [ ! -f "/tekton/home/.docker/config.json" ]; then
+          echo -e "[🔴]: Docker config not found!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Docker config found.\n"
+
+        echo -e "[⏳]: Normalizing the repository name..."
+        REPOSITORY="$(params.repository)"
+        LOWER_PROJECT=$(echo -e "{{ .Values.harbor.project }}" | tr '[:upper:]' '[:lower:]')
+        LOWER_REPOSITORY=$(echo -e "$REPOSITORY" | tr '[:upper:]' '[:lower:]')
+        if [ "${LOWER_REPOSITORY#"$LOWER_PROJECT"}" != "$LOWER_REPOSITORY" ]; then
+          PREFIX_LENGTH=${#LOWER_PROJECT}
+          REPOSITORY="${REPOSITORY:$PREFIX_LENGTH}"
+          REPOSITORY="${REPOSITORY#[-_]}"
+        fi
+        echo -e "[🟢]: Repository name normalized to '$REPOSITORY'.\n"
+
+        echo -e "[⏳]: Normalizing the tag name..."
+        REVISION="$(params.revision)"
+        if echo -e "$REVISION" | grep -Eq '^[0-9a-f]{7,40}$'; then
+          TAG="${REVISION:0:$(params.sha-length)}"
+        elif echo -e "$REVISION" | grep -Eq '^v[0-9]'; then
+          TAG="${REVISION#v}"
+        else
+          echo -e "[🔴]: Invalid revision: '$REVISION'!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Tag name normalized to '$TAG'.\n"
+
+        echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.harbor.project }}-{{ .Values.environment }}'..."
+        skopeo copy \
+          --dest-authfile="/tekton/home/.docker/config.json" \
+          --dest-tls-verify="false" \
+          "oci-archive:$(params.artifact)" \
+          "docker://{{ .Values.harbor.host }}/{{ .Values.harbor.project }}-{{ .Values.environment }}/$REPOSITORY:$TAG"
+        echo -e "[🟢]: Image pushed successfully.\n"
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: harbor-secret

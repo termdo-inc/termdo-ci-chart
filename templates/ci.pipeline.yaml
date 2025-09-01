@@ -1,0 +1,80 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ci-pipeline
+spec:
+  params:
+    - name: url
+      type: string
+      description: SSH URL of the Git repository to clone
+    - name: revision
+      type: string
+      description: Commit SHA or tag to checkout
+    - name: repository
+      type: string
+      description: Repository name for the image
+  workspaces:
+    - name: shared
+      description: Shared workspace for tasks
+  tasks:
+    - name: clone
+      taskRef:
+        name: clone-task
+      params:
+        - name: url
+          value: $(params.url)
+        - name: revision
+          value: $(params.revision)
+        - name: retries
+          value: "3"
+        - name: delay
+          value: "3"
+      workspaces:
+        - name: source
+          workspace: shared
+
+    - name: analyze
+      runAfter: [clone]
+      taskRef:
+        name: analyze-task
+      workspaces:
+        - name: source
+          workspace: shared
+
+    - name: test
+      runAfter: [analyze]
+      taskRef:
+        name: test-task
+      workspaces:
+        - name: source
+          workspace: shared
+
+    - name: build
+      runAfter: [test]
+      taskRef:
+        name: build-task
+      params:
+        - name: artifact
+          value: image
+      workspaces:
+        - name: source
+          workspace: shared
+        - name: artifacts
+          workspace: shared
+
+    - name: push
+      runAfter: [build]
+      taskRef:
+        name: push-task
+      workspaces:
+        - name: artifacts
+          workspace: shared
+      params:
+        - name: artifact
+          value: image
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: sha-length
+          value: "7"

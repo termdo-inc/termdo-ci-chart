@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: test-task
+spec:
+  workspaces:
+    - name: source
+      description: Workspace containing the repository
+      readOnly: true
+  steps:
+    - name: test
+      image: moby/buildkit:rootless
+      securityContext:
+        appArmorProfile:
+          type: Unconfined
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: BUILDKITD_FLAGS
+          value: "--oci-worker-no-process-sandbox"
+      script: |
+        #!/bin/sh
+        set -e
+
+        echo -e "[⏳]: Running tests..."
+        buildctl-daemonless.sh build \
+          --frontend dockerfile.v0 \
+          --local context="." \
+          --local dockerfile="." \
+          --opt target=tester \
+          --output type=oci,dest=/dev/null
+        echo -e "[🟢]: Tests passed.\n"

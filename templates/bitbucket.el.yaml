@@ -1,0 +1,26 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: bitbucket-listener
+spec:
+  serviceAccountName: termdo-bitbucket-account
+  triggers:
+    {{- if eq .Values.environment "dev" }}
+    - name: bitbucket-trigger
+      interceptors:
+        - ref:
+            name: bitbucket
+          params:
+            - name: secretRef
+              value:
+                secretName: bitbucket-secret
+                secretKey: {{ .Values.bitbucket.secretKey }}
+            - name: eventTypes
+              value:
+                - repo:refs_changed
+      bindings:
+        - ref: bitbucket-binding
+      template:
+        ref: bitbucket-template
+    {{- else if eq .Values.environment "test" }}
+    - name: bitbucket-trigger
