@@ -23,16 +23,10 @@ spec:
   steps:
     - name: push
       image: quay.io/skopeo/stable
-      securityContext:
-        appArmorProfile:
-          type: Unconfined
       volumeMounts:
         - name: docker-config
           mountPath: /tekton/home/.docker
       workingDir: $(workspaces.artifacts.path)
-      env:
-        - name: BUILDKITD_FLAGS
-          value: "--oci-worker-no-process-sandbox"
       script: |
         #!/bin/sh
         set -e
@@ -85,3 +79,6 @@ spec:
     - name: docker-config
       secret:
         secretName: harbor-secret
+        items:
+          - key: .dockerconfigjson
+            path: config.json
