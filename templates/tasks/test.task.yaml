@@ -7,6 +7,8 @@ spec:
     - name: source
       description: Workspace containing the repository
       readOnly: true
+    - name: cache
+      description: Workspace for caching image layers
   steps:
     - name: test
       image: moby/buildkit:rootless
@@ -27,5 +29,7 @@ spec:
           --local context="." \
           --local dockerfile="." \
           --opt target=tester \
+          --export-cache type=local,dest=$(workspaces.cache.path),mode=max \
           --output type=oci,dest=/dev/null
-        echo -e "[🟢]: Tests passed.\n"
+        echo -e "[🟢]: Tests passed."
+        echo -e "[🟢]: Build cache exported to '$(workspaces.cache.path)'.\n"

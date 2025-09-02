@@ -48,6 +48,8 @@ spec:
       workspaces:
         - name: source
           workspace: shared
+        - name: cache
+          workspace: shared
 
     - name: build
       runAfter: [test]
@@ -58,6 +60,8 @@ spec:
           value: image
       workspaces:
         - name: source
+          workspace: shared
+        - name: cache
           workspace: shared
         - name: artifacts
           workspace: shared

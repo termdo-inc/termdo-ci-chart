@@ -11,6 +11,9 @@ spec:
     - name: source
       description: Workspace containing the repository
       readOnly: true
+    - name: cache
+      description: Workspace for caching image layers
+      readOnly: true
     - name: artifacts
       description: Workspace to store the built image tarball
   steps:
@@ -25,10 +28,18 @@ spec:
         #!/bin/sh
         set -e
 
+        echo "[⏳]: Checking for BuildKit cache..."
+        if [ ! -f "$(workspaces.cache.path)/index.json" ]; then
+          echo -e "[🟠]: No cache found in '$(workspaces.cache.path)'.\n"
+        else
+          echo -e "[🟢]: Cache found in '$(workspaces.cache.path)'.\n"
+        fi
+
         echo -e "[⏳]: Building the image..."
         buildctl-daemonless.sh build \
           --frontend dockerfile.v0 \
           --local context="." \
           --local dockerfile="." \
+          --import-cache type=local,src=$(workspaces.cache.path) \
           --output type=oci,dest="$(workspaces.artifacts.path)/$(params.artifact)"
         echo -e "[🟢]: Image built and saved to '$(workspaces.artifacts.path)/$(params.artifact)'.\n"
