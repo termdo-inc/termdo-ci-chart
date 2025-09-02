@@ -5,7 +5,7 @@ metadata:
 spec:
   params:
     - name: url
-      value: "ssh://git@{{ .Values.bitbucket.host }}:{{ .Values.bitbucket.port }}/$(extensions.project)/$(extensions.repository).git"
+      value: "$(extensions.url)"
     - name: revision
       value: "$(extensions.revision)"
     - name: repository

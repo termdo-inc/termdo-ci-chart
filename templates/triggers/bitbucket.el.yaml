@@ -30,8 +30,11 @@ spec:
                 )
             - name: overlays
               value:
-                - key: project
-                  expression: body.repository.project.key
+                - key: url
+                  expression: >
+                    body.repository.links.clone
+                      .filter(c, c.name == "ssh")
+                      .first().href
                 - key: revision
                   expression: >
                     body.changes.filter(c,
@@ -50,8 +53,11 @@ spec:
                 )
             - name: overlays
               value:
-                - key: project
-                  expression: body.repository.project.key
+                - key: url
+                  expression: >
+                    body.repository.links.clone
+                      .filter(c, c.name == "ssh")
+                      .first().href
                 - key: revision
                   expression: >
                     body.changes.filter(c,
