@@ -34,11 +34,11 @@ spec:
                   expression: body.repository.project.key
                 - key: revision
                   expression: >
-                    body.changes.find(c,
+                    body.changes.filter(c,
                       c.ref.type == "BRANCH" &&
                       c.ref.displayId == "{{ .Values.bitbucket.branch }}" &&
                       c.type == "UPDATE"
-                    ).toHash
+                    ).first().toHash
                 - key: repository
                   expression: body.repository.slug
             {{- else }}
@@ -54,10 +54,10 @@ spec:
                   expression: body.repository.project.key
                 - key: revision
                   expression: >
-                    body.changes.find(c,
+                    body.changes.filter(c,
                       c.ref.type == "TAG" &&
                       c.type == "ADD"
-                    ).displayId
+                    ).first().displayId
                 - key: repository
                   expression: body.repository.slug
             {{- end }}
