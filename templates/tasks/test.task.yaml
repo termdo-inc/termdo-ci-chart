@@ -25,9 +25,10 @@ spec:
         buildctl-daemonless.sh build \
           --frontend dockerfile.v0 \
           --local context="." \
-          --local dockerfile="." \
-          --opt target=tester \
-          --export-cache type=local,dest=$(workspaces.cache.path),mode=max \
+          --local dockerfile="{{ .Values.project.dockerfile.path }}" \
+          --opt filename={{ .Values.project.dockerfile.name }} \
+          --opt target="{{ .Values.project.dockerfile.testStage }}" \
+          --export-cache type=local,dest="$(workspaces.cache.path)",mode=max \
           --output type=oci,dest=/dev/null
         echo -e "[🟢]: Tests passed."
         echo -e "[🟢]: Build cache exported to '$(workspaces.cache.path)'.\n"

@@ -1,6 +1,10 @@
 project:
   name: your_project_name_without_env_suffix
   env: dev/test/prod
+  dockerfile:
+    name: Dockerfile
+    path: "."
+    testStage: tester
 
 harbor:
   host: your_harbor_registry_host

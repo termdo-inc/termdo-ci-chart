@@ -16,7 +16,7 @@ spec:
         set -e
 
         echo -e "[⏳]: Analyzing..."
-        if [ ! -f "Dockerfile" ]; then
+        if [ ! -f "{{ .Values.project.dockerfile.path }}/{{ .Values.project.dockerfile.name }}" ]; then
           echo -e "[🔴]: Dockerfile not found!\n"
           exit 1
         fi

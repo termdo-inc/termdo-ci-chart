@@ -39,7 +39,8 @@ spec:
         buildctl-daemonless.sh build \
           --frontend dockerfile.v0 \
           --local context="." \
-          --local dockerfile="." \
+          --local dockerfile="{{ .Values.project.dockerfile.path }}" \
+          --opt filename={{ .Values.project.dockerfile.name }} \
           --import-cache type=local,src=$(workspaces.cache.path) \
           --output type=oci,dest="$(workspaces.artifacts.path)/$(params.artifact)"
         echo -e "[🟢]: Image built and saved to '$(workspaces.artifacts.path)/$(params.artifact)'.\n"
