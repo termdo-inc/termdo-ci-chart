@@ -20,7 +20,7 @@ spec:
         - ref:
             name: cel
           params:
-            {{- if or (eq .Values.environment "dev") (eq .Values.environment "test") }}
+            {{- if or (eq .Values.project.env "dev") (eq .Values.project.env "test") }}
             - name: filter
               value: >
                 body.changes.exists(c,

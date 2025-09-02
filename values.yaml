@@ -1,8 +1,9 @@
-environment: dev/test/prod
+project:
+  name: your_project_name_without_env_suffix
+  env: dev/test/prod
 
 harbor:
   host: your_harbor_registry_host
-  project: your_harbor_project_name
   secret:
     name: your_harbor_robot_account_name
     token: your_harbor_robot_account_token

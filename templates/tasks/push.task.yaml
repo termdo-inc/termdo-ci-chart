@@ -47,7 +47,7 @@ spec:
 
         echo -e "[⏳]: Normalizing the repository name..."
         REPOSITORY="$(params.repository)"
-        LOWER_PROJECT=$(echo -e "{{ .Values.harbor.project }}" | tr '[:upper:]' '[:lower:]')
+        LOWER_PROJECT=$(echo -e "{{ .Values.project.name }}" | tr '[:upper:]' '[:lower:]')
         LOWER_REPOSITORY=$(echo -e "$REPOSITORY" | tr '[:upper:]' '[:lower:]')
         if [ "${LOWER_REPOSITORY#"$LOWER_PROJECT"}" != "$LOWER_REPOSITORY" ]; then
           PREFIX_LENGTH=${#LOWER_PROJECT}
@@ -68,12 +68,12 @@ spec:
         fi
         echo -e "[🟢]: Tag name normalized to '$TAG'.\n"
 
-        echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.harbor.project }}-{{ .Values.environment }}'..."
+        echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.project.name }}-{{ .Values.project.env }}'..."
         skopeo copy \
           --dest-authfile="/tekton/home/.docker/config.json" \
           --dest-tls-verify="false" \
           "oci-archive:$(params.artifact)" \
-          "docker://{{ .Values.harbor.host }}/{{ .Values.harbor.project }}-{{ .Values.environment }}/$REPOSITORY:$TAG"
+          "docker://{{ .Values.harbor.host }}/{{ .Values.project.name }}-{{ .Values.project.env }}/$REPOSITORY:$TAG"
         echo -e "[🟢]: Image pushed successfully.\n"
   volumes:
     - name: docker-config
