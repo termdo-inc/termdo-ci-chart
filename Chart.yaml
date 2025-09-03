@@ -2,7 +2,7 @@ apiVersion: v2
 name: termdo-ci
 version: "1.0.0"
 kubeVersion: ">=1.23.0"
-description: Helm chart to deploy Termdo application CI on Kubernetes
+description: Helm chart for Termdo application's CI on Kubernetes
 type: application
 home: https://github.com/termdo-inc
 
