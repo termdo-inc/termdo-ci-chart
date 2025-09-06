@@ -36,4 +36,4 @@ pipeline:
     delay: 3
 
 workspace:
-  size: 3Gi
+  size: 2Gi
