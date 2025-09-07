@@ -32,7 +32,7 @@ pipeline:
     tasks: 0h45m0s
     finally: 0h15m0s
   params:
-    retries: 3
+    retries: 5
     delay: 3
 
 workspace:
