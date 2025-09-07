@@ -56,10 +56,14 @@ spec:
       taskRef:
         name: build-task
       params:
-        - name: repository
-          value: $(params.repository)
         - name: artifact
           value: image
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: sha-length
+          value: {{ .Values.shaLength | quote }}
       workspaces:
         - name: source
           workspace: shared

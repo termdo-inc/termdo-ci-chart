@@ -4,12 +4,18 @@ metadata:
   name: build-task
 spec:
   params:
-    - name: repository
-      type: string
-      description: Image repository name
     - name: artifact
       type: string
       description: Name of the artifact (image tarball)
+    - name: repository
+      type: string
+      description: Image repository name
+    - name: revision
+      type: string
+      description: Git revision to tag the image with
+    - name: sha-length
+      type: string
+      description: Length of the git sha to use in the tag
   workspaces:
     - name: source
       description: Workspace containing the repository
