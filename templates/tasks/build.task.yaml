@@ -51,19 +51,19 @@ spec:
         fi
         echo -e "[🟢]: Version name normalized to '$VERSION'.\n"
 
-        echo "[⏳]: Checking for BuildKit cache..."
-        if [ ! -f "$(workspaces.cache.path)/index.json" ]; then
-          echo -e "[🟠]: No cache found in '$(workspaces.cache.path)'.\n"
-        else
-          echo -e "[🟢]: Cache found in '$(workspaces.cache.path)'.\n"
-        fi
-
         echo "[⏳]: Preparing build arguments..."
         if [ "$REPOSITORY" = "web" ]; then
           BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_ENV={{ .Values.project.env }}"
           BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_VER=$VERSION"
         fi
         echo -e "[🟢]: Build arguments prepared: $BUILD_ARGS\n"
+
+        echo "[⏳]: Checking for BuildKit cache..."
+        if [ ! -f "$(workspaces.cache.path)/index.json" ]; then
+          echo -e "[🟠]: No cache found in '$(workspaces.cache.path)'.\n"
+        else
+          echo -e "[🟢]: Cache found in '$(workspaces.cache.path)'.\n"
+        fi
 
         echo -e "[⏳]: Building the image..."
         buildctl-daemonless.sh build \
