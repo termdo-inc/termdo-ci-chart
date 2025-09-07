@@ -28,6 +28,29 @@ spec:
         #!/bin/sh
         set -e
 
+        echo -e "[⏳]: Normalizing the repository name..."
+        REPOSITORY="$(params.repository)"
+        LOWER_PROJECT=$(echo -e "{{ .Values.project.name }}" | tr '[:upper:]' '[:lower:]')
+        LOWER_REPOSITORY=$(echo -e "$REPOSITORY" | tr '[:upper:]' '[:lower:]')
+        if [ "${LOWER_REPOSITORY#"$LOWER_PROJECT"}" != "$LOWER_REPOSITORY" ]; then
+          PREFIX_LENGTH=${#LOWER_PROJECT}
+          REPOSITORY="${REPOSITORY:$PREFIX_LENGTH}"
+          REPOSITORY="${REPOSITORY#[-_]}"
+        fi
+        echo -e "[🟢]: Repository name normalized to '$REPOSITORY'.\n"
+
+        echo -e "[⏳]: Normalizing the version name..."
+        REVISION="$(params.revision)"
+        if echo -e "$REVISION" | grep -Eq '^[0-9a-f]{7,40}$'; then
+          VERSION="${REVISION:0:$(params.sha-length)}"
+        elif echo -e "$REVISION" | grep -Eq '^v[0-9]'; then
+          VERSION="${REVISION#v}"
+        else
+          echo -e "[🔴]: Invalid revision: '$REVISION'!\n"
+          exit 1
+        fi
+        echo -e "[🟢]: Version name normalized to '$VERSION'.\n"
+
         echo "[⏳]: Checking for BuildKit cache..."
         if [ ! -f "$(workspaces.cache.path)/index.json" ]; then
           echo -e "[🟠]: No cache found in '$(workspaces.cache.path)'.\n"
@@ -35,12 +58,20 @@ spec:
           echo -e "[🟢]: Cache found in '$(workspaces.cache.path)'.\n"
         fi
 
+        echo "[⏳]: Preparing build arguments..."
+        if [ "$REPOSITORY" = "web" ]; then
+          BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_ENV={{ .Values.project.env }}"
+          BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_VER=$VERSION"
+        fi
+        echo -e "[🟢]: Build arguments prepared: $BUILD_ARGS\n"
+
         echo -e "[⏳]: Building the image..."
         buildctl-daemonless.sh build \
           --frontend dockerfile.v0 \
           --local context="." \
           --local dockerfile="{{ .Values.project.dockerfile.path }}" \
           --opt filename={{ .Values.project.dockerfile.name }} \
+          $BUILD_ARGS \
           --import-cache type=local,src=$(workspaces.cache.path) \
           --output type=oci,dest="$(workspaces.artifacts.path)/$(params.artifact)"
         echo -e "[🟢]: Image built and saved to '$(workspaces.artifacts.path)/$(params.artifact)'.\n"

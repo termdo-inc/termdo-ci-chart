@@ -56,18 +56,6 @@ spec:
         fi
         echo -e "[🟢]: Repository name normalized to '$REPOSITORY'.\n"
 
-        echo -e "[⏳]: Normalizing the tag name..."
-        REVISION="$(params.revision)"
-        if echo -e "$REVISION" | grep -Eq '^[0-9a-f]{7,40}$'; then
-          TAG="${REVISION:0:$(params.sha-length)}"
-        elif echo -e "$REVISION" | grep -Eq '^v[0-9]'; then
-          TAG="${REVISION#v}"
-        else
-          echo -e "[🔴]: Invalid revision: '$REVISION'!\n"
-          exit 1
-        fi
-        echo -e "[🟢]: Tag name normalized to '$TAG'.\n"
-
         echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.project.name }}-{{ .Values.project.env }}'..."
         skopeo copy \
           --dest-authfile="/tekton/home/.docker/config.json" \
