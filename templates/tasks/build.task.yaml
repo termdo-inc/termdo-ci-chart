@@ -4,6 +4,9 @@ metadata:
   name: build-task
 spec:
   params:
+    - name: repository
+      type: string
+      description: Image repository name
     - name: artifact
       type: string
       description: Name of the artifact (image tarball)
