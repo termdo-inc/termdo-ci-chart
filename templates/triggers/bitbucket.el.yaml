@@ -131,7 +131,7 @@ spec:
                     body.changes.filter(c,
                       c.ref.type == "TAG" &&
                       c.type == "ADD"
-                    ).first().displayId
+                    ).first().ref.displayId
                 - key: repository
                   expression: body.repository.slug
       bindings:
