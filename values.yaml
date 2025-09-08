@@ -1,6 +1,5 @@
 project:
   name: your_project_name_without_env_suffix
-  env: dev/test/prod
   dockerfile:
     name: Dockerfile
     path: "."
@@ -15,7 +14,9 @@ harbor:
 bitbucket:
   host: your_bitbucket_server_host
   port: your_bitbucket_ssh_port
-  branch: your_branch_name
+  branch:
+    dev: your_development_branch_name
+    test: your_testing_branch_name
   eventListener:
     nodePort: 30019
   config:

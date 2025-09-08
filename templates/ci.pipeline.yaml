@@ -4,6 +4,9 @@ metadata:
   name: ci-pipeline
 spec:
   params:
+    - name: env
+      type: string
+      description: Deployment environment (dev, test, prod)
     - name: url
       type: string
       description: SSH URL of the Git repository to clone
@@ -17,6 +20,7 @@ spec:
     - name: shared
       description: Shared workspace for tasks
   tasks:
+
     - name: clone
       taskRef:
         name: clone-task
@@ -56,6 +60,8 @@ spec:
       taskRef:
         name: build-task
       params:
+        - name: env
+          value: $(params.env)
         - name: artifact
           value: image
         - name: repository
@@ -76,10 +82,9 @@ spec:
       runAfter: [build]
       taskRef:
         name: push-task
-      workspaces:
-        - name: artifacts
-          workspace: shared
       params:
+        - name: env
+          value: $(params.env)
         - name: artifact
           value: image
         - name: repository
@@ -88,3 +93,6 @@ spec:
           value: $(params.revision)
         - name: sha-length
           value: {{ .Values.shaLength | quote }}
+      workspaces:
+        - name: artifacts
+          workspace: shared

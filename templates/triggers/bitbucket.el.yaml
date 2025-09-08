@@ -5,7 +5,8 @@ metadata:
 spec:
   serviceAccountName: tekton-sa
   triggers:
-    - name: refs-changed-trigger
+
+    - name: dev-refs-changed-trigger
       interceptors:
         - ref:
             name: bitbucket
@@ -20,16 +21,17 @@ spec:
         - ref:
             name: cel
           params:
-            {{- if or (eq .Values.project.env "dev") (eq .Values.project.env "test") }}
             - name: filter
               value: >
                 body.changes.exists(c,
                   c.ref.type == "BRANCH" &&
-                  c.ref.displayId == "{{ .Values.bitbucket.branch }}" &&
+                  c.ref.displayId == "{{ .Values.bitbucket.branch.dev }}" &&
                   c.type == "UPDATE"
                 )
             - name: overlays
               value:
+                - key: env
+                  expression: dev
                 - key: url
                   expression: >
                     body.repository.links.clone
@@ -39,12 +41,76 @@ spec:
                   expression: >
                     body.changes.filter(c,
                       c.ref.type == "BRANCH" &&
-                      c.ref.displayId == "{{ .Values.bitbucket.branch }}" &&
+                      c.ref.displayId == "{{ .Values.bitbucket.branch.dev }}" &&
                       c.type == "UPDATE"
                     ).first().toHash
                 - key: repository
                   expression: body.repository.slug
-            {{- else }}
+      bindings:
+        - ref: refs-changed-tb
+      template:
+        ref: refs-changed-tt
+
+    - name: test-refs-changed-trigger
+      interceptors:
+        - ref:
+            name: bitbucket
+          params:
+            - name: secretRef
+              value:
+                secretName: webhook-secret
+                secretKey: token
+            - name: eventTypes
+              value:
+                - repo:refs_changed
+        - ref:
+            name: cel
+          params:
+            - name: filter
+              value: >
+                body.changes.exists(c,
+                  c.ref.type == "BRANCH" &&
+                  c.ref.displayId == "{{ .Values.bitbucket.branch.test }}" &&
+                  c.type == "UPDATE"
+                )
+            - name: overlays
+              value:
+                - key: env
+                  expression: test
+                - key: url
+                  expression: >
+                    body.repository.links.clone
+                      .filter(c, c.name == "ssh")
+                      .first().href
+                - key: revision
+                  expression: >
+                    body.changes.filter(c,
+                      c.ref.type == "BRANCH" &&
+                      c.ref.displayId == "{{ .Values.bitbucket.branch.test }}" &&
+                      c.type == "UPDATE"
+                    ).first().toHash
+                - key: repository
+                  expression: body.repository.slug
+      bindings:
+        - ref: refs-changed-tb
+      template:
+        ref: refs-changed-tt
+
+    - name: prod-refs-changed-trigger
+      interceptors:
+        - ref:
+            name: bitbucket
+          params:
+            - name: secretRef
+              value:
+                secretName: webhook-secret
+                secretKey: token
+            - name: eventTypes
+              value:
+                - repo:refs_changed
+        - ref:
+            name: cel
+          params:
             - name: filter
               value: >
                 body.changes.exists(c,
@@ -53,6 +119,8 @@ spec:
                 )
             - name: overlays
               value:
+                - key: env
+                  expression: prod
                 - key: url
                   expression: >
                     body.repository.links.clone
@@ -66,11 +134,11 @@ spec:
                     ).first().displayId
                 - key: repository
                   expression: body.repository.slug
-            {{- end }}
       bindings:
         - ref: refs-changed-tb
       template:
         ref: refs-changed-tt
+
   resources:
     kubernetesResource:
       serviceType: NodePort

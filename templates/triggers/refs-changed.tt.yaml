@@ -4,6 +4,7 @@ metadata:
   name: refs-changed-tt
 spec:
   params:
+    - name: env
     - name: url
     - name: revision
     - name: repository
@@ -20,6 +21,8 @@ spec:
         pipelineRef:
           name: ci-pipeline
         params:
+          - name: env
+            value: $(tt.params.env)
           - name: url
             value: $(tt.params.url)
           - name: revision

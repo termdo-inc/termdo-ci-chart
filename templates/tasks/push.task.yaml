@@ -4,6 +4,9 @@ metadata:
   name: push-task
 spec:
   params:
+    - name: env
+      type: string
+      description: Deployment environment (dev, test, prod)
     - name: artifact
       type: string
       description: Name of the artifact (image tarball)
@@ -68,12 +71,12 @@ spec:
         fi
         echo -e "[🟢]: Tag name normalized to '$TAG'.\n"
 
-        echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.project.name }}-{{ .Values.project.env }}'..."
+        echo -e "[⏳]: Pushing image '$REPOSITORY:$TAG' to project '{{ .Values.project.name }}-$(params.env)'..."
         skopeo copy \
           --dest-authfile="/tekton/home/.docker/config.json" \
           --dest-tls-verify="false" \
           "oci-archive:$(params.artifact)" \
-          "docker://{{ .Values.harbor.host }}/{{ .Values.project.name }}-{{ .Values.project.env }}/$REPOSITORY:$TAG"
+          "docker://{{ .Values.harbor.host }}/{{ .Values.project.name }}-$(params.env)/$REPOSITORY:$TAG"
         echo -e "[🟢]: Image pushed successfully.\n"
   volumes:
     - name: docker-config

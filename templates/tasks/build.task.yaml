@@ -4,6 +4,9 @@ metadata:
   name: build-task
 spec:
   params:
+    - name: env
+      type: string
+      description: Deployment environment (dev, test, prod)
     - name: artifact
       type: string
       description: Name of the artifact (image tarball)
@@ -62,7 +65,7 @@ spec:
 
         echo "[⏳]: Preparing build arguments..."
         if [ "$REPOSITORY" = "web" ]; then
-          BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_ENV={{ .Values.project.env }}"
+          BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_ENV=$(params.env)"
           BUILD_ARGS="$BUILD_ARGS --opt build-arg:PUBLIC_APP_VER=$VERSION"
         fi
         echo -e "[🟢]: Build arguments prepared: $BUILD_ARGS\n"

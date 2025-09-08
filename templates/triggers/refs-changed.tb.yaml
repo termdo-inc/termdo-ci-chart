@@ -4,6 +4,8 @@ metadata:
   name: refs-changed-tb
 spec:
   params:
+    - name: env
+      value: "$(extensions.env)"
     - name: url
       value: "$(extensions.url)"
     - name: revision
