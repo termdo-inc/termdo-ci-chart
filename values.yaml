@@ -15,8 +15,8 @@ bitbucket:
   host: your_bitbucket_server_host
   port: your_bitbucket_ssh_port
   branch:
-    dev: your_development_branch_name
-    test: your_testing_branch_name
+    dev: dev
+    test: test
   eventListener:
     nodePort: 30019
   config:
